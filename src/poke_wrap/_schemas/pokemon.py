@@ -7,6 +7,8 @@ from typing import Any
 from pydantic import Field
 
 from poke_wrap._schemas.common import BaseSchema, NamedAPIResourceSchema
+from poke_wrap.exceptions import PokeAPIError
+from poke_wrap.models.pokemon import AbilitySlot, Pokemon, PokemonType, Stats
 
 __all__ = [
     "AbilitySlotSchema",
@@ -108,3 +110,74 @@ class PokemonSchema(BaseSchema):
     species: NamedAPIResourceSchema
     sprites: SpritesSchema = Field(default_factory=SpritesSchema)
     cries: CriesSchema | None = None
+
+
+    def to_domain(self) -> Pokemon:
+        """Convert this DTO into the corresponding domain model.
+
+        Handles three responsibilities:
+
+        1. **Unit conversion**: PokeAPI returns height in decimetres and
+           weight in hectograms. The domain uses metres and kilograms.
+        2. **Structural flattening**: ``stats`` (a list of slots) becomes
+           a :class:`~poke_wrap.models.Stats` object with named fields.
+           ``types`` (a list of reference slots) becomes a list of
+           :class:`~poke_wrap.models.PokemonType` members.
+        3. **Reference conversion**: each nested ``NamedAPIResourceSchema``
+           is turned into a domain-level ``Reference``.
+
+        Raises:
+            PokeAPIError: If the response is missing a required stat, or
+                if it contains a type name that PokeWrap does not know
+                about. This usually indicates either a bug in PokeWrap
+                or a new addition to PokeAPI that we have not caught up
+                with yet.
+        """
+        return Pokemon(
+            id=self.id,
+            name=self.name,
+            height_m=self.height / 10,
+            weight_kg=self.weight / 10,
+            base_experience=self.base_experience,
+            is_default=self.is_default,
+            order=self.order,
+            types=self._types_to_domain(),
+            stats=self._stats_to_domain(),
+            abilities=[self._ability_slot_to_domain(a) for a in self.abilities],
+            sprite_url=self.sprites.front_default,
+        )
+
+    def _stats_to_domain(self) -> Stats:
+        """Map the six base stats from slots into a named ``Stats`` object."""
+        by_name = {slot.stat.name: slot.base_stat for slot in self.stats}
+        try:
+            return Stats(
+                hp=by_name["hp"],
+                attack=by_name["attack"],
+                defense=by_name["defense"],
+                special_attack=by_name["special-attack"],
+                special_defense=by_name["special-defense"],
+                speed=by_name["speed"],
+            )
+        except KeyError as exc:
+            raise PokeAPIError(
+                f"Pokemon {self.name!r} is missing required stat: {exc.args[0]!r}"
+            ) from exc
+
+    def _types_to_domain(self) -> list[PokemonType]:
+        """Map type references into ``PokemonType`` members."""
+        try:
+            return [PokemonType(slot.type.name) for slot in self.types]
+        except ValueError as exc:
+            raise PokeAPIError(
+                f"Pokemon {self.name!r} has an unknown type: {exc}"
+            ) from exc
+
+    @staticmethod
+    def _ability_slot_to_domain(slot: AbilitySlotSchema) -> AbilitySlot:
+        """Convert an ability slot DTO into a domain ``AbilitySlot``."""
+        return AbilitySlot(
+            ability=slot.ability.to_domain(),
+            is_hidden=slot.is_hidden,
+            slot=slot.slot,
+        )

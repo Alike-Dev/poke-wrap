@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict
 
+from poke_wrap.models.common import Reference
+
 __all__ = ["APIResourceSchema", "NamedAPIResourceSchema"]
 
 
@@ -54,3 +56,7 @@ class NamedAPIResourceSchema(BaseSchema):
 
     name: str
     url: str
+
+    def to_domain(self) -> Reference:
+        """Convert to a domain-level :class:`~poke_wrap.models.Reference`."""
+        return Reference(name=self.name, url=self.url)
