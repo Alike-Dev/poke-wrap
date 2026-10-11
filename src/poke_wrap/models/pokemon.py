@@ -1,0 +1,117 @@
+"""Domain models for the ``pokemon`` resource."""
+
+
+from enum import StrEnum
+
+from pydantic import BaseModel, ConfigDict
+
+from poke_wrap.models.common import Reference
+
+__all__ = ["AbilitySlot", "Pokemon", "PokemonType", "Stats"]
+
+
+class PokemonType(StrEnum):
+    """The 18 elemental types in Pokémon.
+
+    Values match PokeAPI's type names, so ``PokemonType.FIRE == "fire"``.
+    """
+
+    NORMAL = "normal"
+    FIRE = "fire"
+    WATER = "water"
+    ELECTRIC = "electric"
+    GRASS = "grass"
+    ICE = "ice"
+    FIGHTING = "fighting"
+    POISON = "poison"
+    GROUND = "ground"
+    FLYING = "flying"
+    PSYCHIC = "psychic"
+    BUG = "bug"
+    ROCK = "rock"
+    GHOST = "ghost"
+    DRAGON = "dragon"
+    DARK = "dark"
+    STEEL = "steel"
+    FAIRY = "fairy"
+
+
+class Stats(BaseModel):
+    """The six base stats of a Pokémon.
+
+    Unlike the raw PokeAPI response (which is a list of slot objects),
+    this model exposes each stat as a named attribute, and computes
+    the Base Stat Total (BST) on demand.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    hp: int
+    attack: int
+    defense: int
+    special_attack: int
+    special_defense: int
+    speed: int
+
+    @property
+    def total(self) -> int:
+        """Base Stat Total (BST): the sum of all six stats."""
+        return (
+            self.hp
+            + self.attack
+            + self.defense
+            + self.special_attack
+            + self.special_defense
+            + self.speed
+        )
+
+
+class AbilitySlot(BaseModel):
+    """One ability of a Pokémon, as listed on its ``/pokemon`` entry.
+
+    The ``ability`` reference is deliberately lightweight: it carries
+    only the name and URL. Fetching the full ability payload requires
+    an extra call and is opt-in (see ``get_ability``).
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    ability: Reference
+    is_hidden: bool
+    slot: int
+
+
+class Pokemon(BaseModel):
+    """A Pokémon as returned by ``GET /pokemon/{id or name}/``.
+
+    This is the lightweight domain model. It intentionally drops fields
+    that are rarely useful (``game_indices``, ``held_items``,
+    ``past_abilities``, ``past_stats``, ``past_types``, ``forms``) and
+    normalises the ones it keeps:
+
+    - ``height_m`` in metres instead of PokeAPI's decimetres.
+    - ``weight_kg`` in kilograms instead of PokeAPI's hectograms.
+    - ``types`` as a list of :class:`PokemonType` instead of reference slots.
+    - ``stats`` as a :class:`Stats` object instead of a list.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    id: int
+    name: str
+    height_m: float
+    weight_kg: float
+    base_experience: int | None
+    is_default: bool
+    order: int
+
+    types: list[PokemonType]
+    stats: Stats
+    abilities: list[AbilitySlot]
+
+    sprite_url: str | None = None
+
+    @property
+    def is_dual_type(self) -> bool:
+        """Whether the Pokémon has two types instead of one."""
+        return len(self.types) == 2
