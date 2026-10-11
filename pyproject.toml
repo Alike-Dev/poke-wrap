@@ -104,3 +104,7 @@ plugins = ["pydantic.mypy"]
 [[tool.mypy.overrides]]
 module = ["hishel.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disable_error_code = ["comparison-overlap"]
