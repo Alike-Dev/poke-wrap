@@ -72,7 +72,7 @@ async def test_get_returns_parsed_json(
         url=f"{BASE}/pokemon/pikachu/",
         json={"id": 25, "name": "pikachu"},
     )
-    data = await client._get(Endpoint.POKEMON, "pikachu")
+    data = await client._get(Endpoint.POKEMON, "pikachu") # pyright: ignore[reportPrivateUsage]
     assert data == {"id": 25, "name": "pikachu"}
 
 
