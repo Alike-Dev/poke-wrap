@@ -23,7 +23,7 @@ from poke_wrap.exceptions import (
     ResourceNotFoundError,
 )
 from poke_wrap.models.ability import Ability
-from poke_wrap.models.pokemon import PokemonDetailed
+from poke_wrap.models.pokemon import Pokemon, PokemonDetailed
 from poke_wrap.models.type import TypeDetail
 
 __all__ = ["DEFAULT_USER_AGENT", "AsyncPokeAPIClient"]
@@ -269,6 +269,11 @@ class AsyncPokeAPIClient:
         eventually return a typed :class:`~poke_wrap.models.Pokemon`.
         """
         return await self._get(Endpoint.POKEMON, name_or_id)
+
+    async def get_pokemon_domain(self, name_or_id: str | int) -> Pokemon:
+        """Fetch a Pokémon and convert it to a typed domain model."""
+        data = await self._get(Endpoint.POKEMON, name_or_id)
+        return PokemonSchema.model_validate(data).to_domain()
 
     async def get_pokemon_detailed(
         self,

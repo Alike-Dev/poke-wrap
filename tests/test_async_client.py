@@ -17,6 +17,7 @@ from poke_wrap.exceptions import (
     RateLimitError,
     ResourceNotFoundError,
 )
+from poke_wrap.models.pokemon import Pokemon
 
 BASE = "https://pokeapi.co/api/v2"
 
@@ -36,6 +37,43 @@ async def client(tmp_path: Path) -> Any:
     async with AsyncPokeAPIClient(cache_path=tmp_path / "cache.db") as c:
         yield c
 
+def _pokemon_payload() -> dict[str, Any]:
+    return {
+        "id": 150,
+        "name": "mewtwo",
+        "base_experience": 306,
+        "height": 20,
+        "weight": 1220,
+        "is_default": True,
+        "order": 245,
+        "abilities": [
+            {
+                "is_hidden": False,
+                "slot": 1,
+                "ability": {
+                    "name": "pressure",
+                    "url": f"{BASE}/ability/46/",
+                },
+            },
+        ],
+        "types": [
+            {
+                "slot": 1,
+                "type": {"name": "psychic", "url": f"{BASE}/type/14/"},
+            }
+        ],
+        "stats": [
+            {"base_stat": 106, "effort": 0, "stat": {"name": "hp", "url": f"{BASE}/stat/1/"}},
+            {"base_stat": 110, "effort": 0, "stat": {"name": "attack", "url": f"{BASE}/stat/2/"}},
+            {"base_stat": 90, "effort": 0, "stat": {"name": "defense", "url": f"{BASE}/stat/3/"}},
+            {"base_stat": 154, "effort": 0, "stat": {"name": "special-attack", "url": f"{BASE}/stat/4/"}},
+            {"base_stat": 90, "effort": 0, "stat": {"name": "special-defense", "url": f"{BASE}/stat/5/"}},
+            {"base_stat": 130, "effort": 0, "stat": {"name": "speed", "url": f"{BASE}/stat/6/"}},
+        ],
+        "moves": [],
+        "species": {"name": "mewtwo", "url": f"{BASE}/pokemon-species/150/"},
+        "sprites": {"front_default": "https://example.com/mewtwo.png"},
+    }
 
 # ---------------------------------------------------------------------------
 # Construction and lifecycle
@@ -86,6 +124,15 @@ async def test_get_pokemon_with_numeric_id(
     data = await client.get_pokemon(25)
     assert data["id"] == 25
 
+async def test_get_pokemon_domain_returns_typed_model(
+    client: AsyncPokeAPIClient, httpx_mock: HTTPXMock
+) -> None:
+    httpx_mock.add_response(
+        url=f"{BASE}/pokemon/mewtwo/", json=_pokemon_payload()
+    )
+    pokemon = await client.get_pokemon_domain("mewtwo")
+    assert isinstance(pokemon, Pokemon)
+    assert pokemon.name == "mewtwo"
 
 async def test_get_normalizes_case_and_whitespace(
     client: AsyncPokeAPIClient, httpx_mock: HTTPXMock
