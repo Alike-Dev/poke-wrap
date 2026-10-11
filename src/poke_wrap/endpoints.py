@@ -100,7 +100,7 @@ class Endpoint(StrEnum):
     META = "meta"
 
     @classmethod
-    def all(cls) -> list["Endpoint"]:
+    def all(cls) -> list[Endpoint]:
         """Return every endpoint as a list.
 
         Useful when iterating over all resources, e.g. to generate
