@@ -8,7 +8,7 @@ authors = [
     { name = "Alejandro Sosa", email = "alejandrososa.freelancer@gmail.com" }
 ]
 keywords = ["pokeapi", "pokemon", "async", "httpx", "pydantic"]
-requires-python = ">=3.12.10"
+requires-python = ">=3.12"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Framework :: AsyncIO",
@@ -30,9 +30,6 @@ Repository = "https://github.com/Alike-Dev/poke-wrap"
 Issues = "https://github.com/Alike-Dev/poke-wrap/issues"
 Changelog = "https://github.com/Alike-Dev/poke-wrap/blob/main/CHANGELOG.md"
 
-[project.scripts]
-poke-wrap = "poke_wrap:main"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -40,9 +37,18 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/poke_wrap"]
 
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "pep440"
+version_provider = "pep621"
+update_changelog_on_bump = true
+major_version_zero = true
+
 [dependency-groups]
 dev = [
     "build>=1.6.1",
+    "commitizen>=4.19.2",
     "mypy>=2.4.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
@@ -57,6 +63,10 @@ dev = [
 line-length = 100
 target-version = "py312"
 src = ["src", "tests"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
 
 [tool.ruff.lint]
 select = [
@@ -79,6 +89,11 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
 
 [tool.mypy]
 python_version = "3.12"
