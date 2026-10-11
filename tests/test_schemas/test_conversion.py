@@ -90,6 +90,7 @@ def _payload() -> dict[str, Any]:
 
 # --- NamedAPIResourceSchema.to_domain -------------------------------------
 
+
 def test_named_resource_converts_to_reference() -> None:
     schema = NamedAPIResourceSchema.model_validate(
         {"name": "static", "url": "https://pokeapi.co/api/v2/ability/9/"}
@@ -101,6 +102,7 @@ def test_named_resource_converts_to_reference() -> None:
 
 
 # --- PokemonSchema.to_domain: happy path ----------------------------------
+
 
 def test_to_domain_returns_pokemon() -> None:
     pokemon = PokemonSchema.model_validate(_payload()).to_domain()
@@ -161,6 +163,7 @@ def test_missing_sprite_url_becomes_none() -> None:
 
 
 # --- Error paths ----------------------------------------------------------
+
 
 def test_missing_stat_raises_pokeapi_error() -> None:
     payload = _payload()

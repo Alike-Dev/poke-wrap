@@ -112,7 +112,6 @@ class PokemonSchema(BaseSchema):
     sprites: SpritesSchema = Field(default_factory=SpritesSchema)
     cries: CriesSchema | None = None
 
-
     def to_domain(self) -> Pokemon:
         """Convert this DTO into the corresponding domain model.
 
@@ -170,9 +169,7 @@ class PokemonSchema(BaseSchema):
         try:
             return [PokemonType(slot.type.name) for slot in self.types]
         except ValueError as exc:
-            raise PokeAPIError(
-                f"Pokemon {self.name!r} has an unknown type: {exc}"
-            ) from exc
+            raise PokeAPIError(f"Pokemon {self.name!r} has an unknown type: {exc}") from exc
 
     @staticmethod
     def _ability_slot_to_domain(slot: AbilitySlotSchema) -> AbilitySlot:

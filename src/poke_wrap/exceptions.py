@@ -68,9 +68,7 @@ class ResourceNotFoundError(PokeAPIError):
         self.resource_id = resource_id
         self.url = url
 
-        message = (
-            f"Resource '{resource_type}/{resource_id}' not found in PokeAPI"
-        )
+        message = f"Resource '{resource_type}/{resource_id}' not found in PokeAPI"
         if url is not None:
             message += f" (URL: {url})"
 

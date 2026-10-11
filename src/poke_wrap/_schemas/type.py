@@ -14,11 +14,21 @@ __all__ = ["TypeDamageRelationsSchema", "TypeSchema"]
 class TypeDamageRelationsSchema(BaseSchema):
     """Damage relations between types."""
 
-    double_damage_from: list[NamedAPIResourceSchema] = Field(default_factory=list[NamedAPIResourceSchema])
-    double_damage_to: list[NamedAPIResourceSchema] = Field(default_factory=list[NamedAPIResourceSchema])
-    half_damage_from: list[NamedAPIResourceSchema] = Field(default_factory=list[NamedAPIResourceSchema])
-    half_damage_to: list[NamedAPIResourceSchema] = Field(default_factory=list[NamedAPIResourceSchema])
-    no_damage_from: list[NamedAPIResourceSchema] = Field(default_factory=list[NamedAPIResourceSchema])
+    double_damage_from: list[NamedAPIResourceSchema] = Field(
+        default_factory=list[NamedAPIResourceSchema]
+    )
+    double_damage_to: list[NamedAPIResourceSchema] = Field(
+        default_factory=list[NamedAPIResourceSchema]
+    )
+    half_damage_from: list[NamedAPIResourceSchema] = Field(
+        default_factory=list[NamedAPIResourceSchema]
+    )
+    half_damage_to: list[NamedAPIResourceSchema] = Field(
+        default_factory=list[NamedAPIResourceSchema]
+    )
+    no_damage_from: list[NamedAPIResourceSchema] = Field(
+        default_factory=list[NamedAPIResourceSchema]
+    )
     no_damage_to: list[NamedAPIResourceSchema] = Field(default_factory=list[NamedAPIResourceSchema])
 
     def to_domain(self, type_name: str) -> TypeDamageRelations:
@@ -32,9 +42,7 @@ class TypeDamageRelationsSchema(BaseSchema):
         )
 
     @staticmethod
-    def _convert(
-        refs: list[NamedAPIResourceSchema], type_name: str
-    ) -> list[PokemonType]:
+    def _convert(refs: list[NamedAPIResourceSchema], type_name: str) -> list[PokemonType]:
         try:
             return [PokemonType(r.name) for r in refs]
         except ValueError as exc:

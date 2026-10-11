@@ -20,9 +20,7 @@ def test_api_resource_from_valid_dict() -> None:
 
 
 def test_extra_fields_are_ignored() -> None:
-    ref = NamedAPIResourceSchema.model_validate(
-        {"name": "x", "url": "y", "unexpected": 42}
-    )
+    ref = NamedAPIResourceSchema.model_validate({"name": "x", "url": "y", "unexpected": 42})
     assert not hasattr(ref, "unexpected")
 
 

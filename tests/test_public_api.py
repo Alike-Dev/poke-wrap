@@ -14,9 +14,7 @@ import poke_wrap
 def test_all_names_are_importable() -> None:
     """Every name in __all__ must resolve to an attribute."""
     for name in poke_wrap.__all__:
-        assert hasattr(poke_wrap, name), (
-            f"{name!r} is listed in __all__ but not defined"
-        )
+        assert hasattr(poke_wrap, name), f"{name!r} is listed in __all__ but not defined"
 
 
 def test_all_has_no_duplicates() -> None:
@@ -94,4 +92,5 @@ def test_importing_poke_wrap_does_not_touch_network() -> None:
     # module succeeded without network. That's the whole point: importing
     # the library should be fast and side-effect-free.
     import poke_wrap
+
     assert poke_wrap.AsyncPokeAPIClient is not None

@@ -48,7 +48,9 @@ class AbilitySchema(BaseSchema):
     is_main_series: bool
     generation: NamedAPIResourceSchema
 
-    effect_entries: list[AbilityEffectEntrySchema] = Field(default_factory=list[AbilityEffectEntrySchema])
+    effect_entries: list[AbilityEffectEntrySchema] = Field(
+        default_factory=list[AbilityEffectEntrySchema]
+    )
     names: list[AbilityNameSchema] = Field(default_factory=list[AbilityNameSchema])
     pokemon: list[AbilityPokemonSchema] = Field(default_factory=list[AbilityPokemonSchema])
     # effect_changes and flavor_text_entries are dropped for now
@@ -67,8 +69,7 @@ class AbilitySchema(BaseSchema):
             generation = Generation(self.generation.name)
         except ValueError as exc:
             raise PokeAPIError(
-                f"Unknown generation for ability {self.name!r}: "
-                f"{self.generation.name!r}"
+                f"Unknown generation for ability {self.name!r}: {self.generation.name!r}"
             ) from exc
 
         return Ability(

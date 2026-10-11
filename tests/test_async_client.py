@@ -26,6 +26,7 @@ BASE = "https://pokeapi.co/api/v2"
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 async def client(tmp_path: Path) -> Any:
     """Provide a client with an isolated cache per test.
@@ -36,6 +37,7 @@ async def client(tmp_path: Path) -> Any:
     """
     async with AsyncPokeAPIClient(cache_path=tmp_path / "cache.db") as c:
         yield c
+
 
 def _pokemon_payload() -> dict[str, Any]:
     return {
@@ -66,8 +68,16 @@ def _pokemon_payload() -> dict[str, Any]:
             {"base_stat": 106, "effort": 0, "stat": {"name": "hp", "url": f"{BASE}/stat/1/"}},
             {"base_stat": 110, "effort": 0, "stat": {"name": "attack", "url": f"{BASE}/stat/2/"}},
             {"base_stat": 90, "effort": 0, "stat": {"name": "defense", "url": f"{BASE}/stat/3/"}},
-            {"base_stat": 154, "effort": 0, "stat": {"name": "special-attack", "url": f"{BASE}/stat/4/"}},
-            {"base_stat": 90, "effort": 0, "stat": {"name": "special-defense", "url": f"{BASE}/stat/5/"}},
+            {
+                "base_stat": 154,
+                "effort": 0,
+                "stat": {"name": "special-attack", "url": f"{BASE}/stat/4/"},
+            },
+            {
+                "base_stat": 90,
+                "effort": 0,
+                "stat": {"name": "special-defense", "url": f"{BASE}/stat/5/"},
+            },
             {"base_stat": 130, "effort": 0, "stat": {"name": "speed", "url": f"{BASE}/stat/6/"}},
         ],
         "moves": [],
@@ -75,9 +85,11 @@ def _pokemon_payload() -> dict[str, Any]:
         "sprites": {"front_default": "https://example.com/mewtwo.png"},
     }
 
+
 # ---------------------------------------------------------------------------
 # Construction and lifecycle
 # ---------------------------------------------------------------------------
+
 
 async def test_client_works_as_async_context_manager(tmp_path: Path) -> None:
     async with AsyncPokeAPIClient(cache_path=tmp_path / "cache.db") as c:
@@ -103,14 +115,13 @@ async def test_cache_directory_is_created(tmp_path: Path) -> None:
 # _get / get_pokemon: happy path
 # ---------------------------------------------------------------------------
 
-async def test_get_returns_parsed_json(
-    client: AsyncPokeAPIClient, httpx_mock: HTTPXMock
-) -> None:
+
+async def test_get_returns_parsed_json(client: AsyncPokeAPIClient, httpx_mock: HTTPXMock) -> None:
     httpx_mock.add_response(
         url=f"{BASE}/pokemon/pikachu/",
         json={"id": 25, "name": "pikachu"},
     )
-    data = await client._get(Endpoint.POKEMON, "pikachu") # pyright: ignore[reportPrivateUsage]
+    data = await client._get(Endpoint.POKEMON, "pikachu")  # pyright: ignore[reportPrivateUsage]
     assert data == {"id": 25, "name": "pikachu"}
 
 
@@ -124,15 +135,15 @@ async def test_get_pokemon_with_numeric_id(
     data = await client.get_pokemon(25)
     assert data["id"] == 25
 
+
 async def test_get_pokemon_domain_returns_typed_model(
     client: AsyncPokeAPIClient, httpx_mock: HTTPXMock
 ) -> None:
-    httpx_mock.add_response(
-        url=f"{BASE}/pokemon/mewtwo/", json=_pokemon_payload()
-    )
+    httpx_mock.add_response(url=f"{BASE}/pokemon/mewtwo/", json=_pokemon_payload())
     pokemon = await client.get_pokemon_domain("mewtwo")
     assert isinstance(pokemon, Pokemon)
     assert pokemon.name == "mewtwo"
+
 
 async def test_get_normalizes_case_and_whitespace(
     client: AsyncPokeAPIClient, httpx_mock: HTTPXMock
@@ -157,9 +168,7 @@ async def test_get_quotes_special_characters(
     await client.get_pokemon("mr mime")
 
 
-async def test_user_agent_header_is_sent(
-    client: AsyncPokeAPIClient, httpx_mock: HTTPXMock
-) -> None:
+async def test_user_agent_header_is_sent(client: AsyncPokeAPIClient, httpx_mock: HTTPXMock) -> None:
     httpx_mock.add_response(url=f"{BASE}/pokemon/pikachu/", json={})
     await client.get_pokemon("pikachu")
 
@@ -171,6 +180,7 @@ async def test_user_agent_header_is_sent(
 # ---------------------------------------------------------------------------
 # HTTP error mapping
 # ---------------------------------------------------------------------------
+
 
 async def test_404_raises_resource_not_found(
     client: AsyncPokeAPIClient, httpx_mock: HTTPXMock
@@ -229,6 +239,7 @@ async def test_500_raises_generic_pokeapi_error(
 # Network errors
 # ---------------------------------------------------------------------------
 
+
 async def test_timeout_raises_network_error(
     client: AsyncPokeAPIClient, httpx_mock: HTTPXMock
 ) -> None:
@@ -252,6 +263,7 @@ async def test_connection_error_raises_network_error(
 # ---------------------------------------------------------------------------
 # Exception chaining
 # ---------------------------------------------------------------------------
+
 
 async def test_status_error_chains_original_httpx_error(
     client: AsyncPokeAPIClient, httpx_mock: HTTPXMock

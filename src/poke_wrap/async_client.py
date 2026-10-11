@@ -171,10 +171,8 @@ class AsyncPokeAPIClient:
         try:
             data = response.json()
         except Exception as ex:
-            raise PokeAPIError(
-                f"Unexpected respose to request: {endpoint}/{resource_id}"
-                ) from ex
-        
+            raise PokeAPIError(f"Unexpected respose to request: {endpoint}/{resource_id}") from ex
+
         return data
 
     @staticmethod
@@ -209,7 +207,7 @@ class AsyncPokeAPIClient:
         """
         if not url.startswith(self.BASE_URL):
             raise PokeAPIError(f"URL outside PokeAPI domain: {url}")
-        relative = url[len(self.BASE_URL):]
+        relative = url[len(self.BASE_URL) :]
 
         try:
             response = await self._client.get(relative)
@@ -228,9 +226,7 @@ class AsyncPokeAPIClient:
                 raise RateLimitError(
                     retry_after=float(retry_header) if retry_header else None,
                 ) from exc
-            raise PokeAPIError(
-                f"HTTP {response.status_code} from {url}"
-            ) from exc
+            raise PokeAPIError(f"HTTP {response.status_code} from {url}") from exc
         except httpx.RequestError as exc:
             raise NetworkError(str(exc), url=url) from exc
 
@@ -257,7 +253,7 @@ class AsyncPokeAPIClient:
         type_detail = schema.to_domain()
         self._hydration_cache[url] = type_detail
         return type_detail
-    
+
     # ------------------------------------------------------------------
     # Public methods — only one for now, more in step 5.3
     # ------------------------------------------------------------------
@@ -317,18 +313,16 @@ class AsyncPokeAPIClient:
 
         if hydrate_abilities and schema.abilities:
             abilities = list(
-                await asyncio.gather(*[
-                    guarded(self._fetch_ability(slot.ability.url))
-                    for slot in schema.abilities
-                ])
+                await asyncio.gather(
+                    *[guarded(self._fetch_ability(slot.ability.url)) for slot in schema.abilities]
+                )
             )
 
         if hydrate_types and schema.types:
             types = list(
-                await asyncio.gather(*[
-                    guarded(self._fetch_type(slot.type.url))
-                    for slot in schema.types
-                ])
+                await asyncio.gather(
+                    *[guarded(self._fetch_type(slot.type.url)) for slot in schema.types]
+                )
             )
 
         return PokemonDetailed(pokemon=base, abilities=abilities, types=types)

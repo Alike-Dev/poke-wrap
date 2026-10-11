@@ -1,6 +1,5 @@
 """Domain models for the ``pokemon`` resource."""
 
-
 from pydantic import BaseModel, ConfigDict
 
 from poke_wrap.models.ability import Ability
@@ -89,6 +88,7 @@ class Pokemon(BaseModel):
     def is_dual_type(self) -> bool:
         """Whether the Pokémon has two types instead of one."""
         return len(self.types) == 2
+
 
 class PokemonDetailed(BaseModel):
     """The result of :meth:`AsyncPokeAPIClient.get_pokemon_detailed`.

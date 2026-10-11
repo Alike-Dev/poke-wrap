@@ -48,8 +48,16 @@ def _pokemon_payload() -> dict[str, Any]:
             {"base_stat": 106, "effort": 0, "stat": {"name": "hp", "url": f"{BASE}/stat/1/"}},
             {"base_stat": 110, "effort": 0, "stat": {"name": "attack", "url": f"{BASE}/stat/2/"}},
             {"base_stat": 90, "effort": 0, "stat": {"name": "defense", "url": f"{BASE}/stat/3/"}},
-            {"base_stat": 154, "effort": 0, "stat": {"name": "special-attack", "url": f"{BASE}/stat/4/"}},
-            {"base_stat": 90, "effort": 0, "stat": {"name": "special-defense", "url": f"{BASE}/stat/5/"}},
+            {
+                "base_stat": 154,
+                "effort": 0,
+                "stat": {"name": "special-attack", "url": f"{BASE}/stat/4/"},
+            },
+            {
+                "base_stat": 90,
+                "effort": 0,
+                "stat": {"name": "special-defense", "url": f"{BASE}/stat/5/"},
+            },
             {"base_stat": 130, "effort": 0, "stat": {"name": "speed", "url": f"{BASE}/stat/6/"}},
         ],
         "moves": [],

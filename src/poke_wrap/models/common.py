@@ -1,6 +1,5 @@
 """Shared domain models used across multiple resources."""
 
-
 from enum import StrEnum
 from urllib.parse import urlparse
 

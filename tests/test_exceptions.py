@@ -1,6 +1,5 @@
 """Tests for the exceptions module."""
 
-
 from poke_wrap.exceptions import (
     HydrationError,
     NetworkError,
