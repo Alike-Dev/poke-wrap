@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from types import TracebackType
 from typing import Any, NoReturn, Self
@@ -11,6 +12,9 @@ import httpx
 from hishel import AsyncSqliteStorage, CacheOptions, SpecificationPolicy
 from hishel.httpx import AsyncCacheClient
 
+from poke_wrap._schemas.ability import AbilitySchema
+from poke_wrap._schemas.pokemon import PokemonSchema
+from poke_wrap._schemas.type import TypeSchema
 from poke_wrap.endpoints import Endpoint
 from poke_wrap.exceptions import (
     NetworkError,
@@ -18,6 +22,9 @@ from poke_wrap.exceptions import (
     RateLimitError,
     ResourceNotFoundError,
 )
+from poke_wrap.models.ability import Ability
+from poke_wrap.models.pokemon import PokemonDetailed
+from poke_wrap.models.type import TypeDetail
 
 __all__ = ["DEFAULT_USER_AGENT", "AsyncPokeAPIClient"]
 
@@ -90,6 +97,8 @@ class AsyncPokeAPIClient:
             policy=policy,
             storage=storage,
         )
+
+        self._hydration_cache: dict[str, Ability | TypeDetail] = {}
 
     async def __aenter__(self) -> Self:
         return self
@@ -192,6 +201,63 @@ class AsyncPokeAPIClient:
             raise RateLimitError(retry_after=retry_after) from exc
         raise PokeAPIError(f"HTTP {response.status_code} from {response.request.url}") from exc
 
+    async def _get_by_url(self, url: str) -> httpx.Response:
+        """Perform a GET on an absolute URL within PokeAPI.
+
+        Used by the hydration layer to follow references. Rejects URLs
+        that fall outside PokeAPI's domain to avoid SSRF-style surprises.
+        """
+        if not url.startswith(self.BASE_URL):
+            raise PokeAPIError(f"URL outside PokeAPI domain: {url}")
+        relative = url[len(self.BASE_URL):]
+
+        try:
+            response = await self._client.get(relative)
+            response.raise_for_status()
+            return response
+        except httpx.HTTPStatusError as exc:
+            response = exc.response
+            if response.status_code == 404:
+                raise ResourceNotFoundError(
+                    resource_type=relative.rstrip("/").rsplit("/", 1)[0],
+                    resource_id=relative.rstrip("/").rsplit("/", 1)[-1],
+                    url=url,
+                ) from exc
+            if response.status_code == 429:
+                retry_header = response.headers.get("Retry-After")
+                raise RateLimitError(
+                    retry_after=float(retry_header) if retry_header else None,
+                ) from exc
+            raise PokeAPIError(
+                f"HTTP {response.status_code} from {url}"
+            ) from exc
+        except httpx.RequestError as exc:
+            raise NetworkError(str(exc), url=url) from exc
+
+    async def _fetch_ability(self, url: str) -> Ability:
+        """Fetch and convert an ability by its reference URL."""
+        cached = self._hydration_cache.get(url)
+        if isinstance(cached, Ability):
+            return cached
+
+        response = await self._get_by_url(url)
+        schema = AbilitySchema.model_validate(response.json())
+        ability = schema.to_domain()
+        self._hydration_cache[url] = ability
+        return ability
+
+    async def _fetch_type(self, url: str) -> TypeDetail:
+        """Fetch and convert a type by its reference URL."""
+        cached = self._hydration_cache.get(url)
+        if isinstance(cached, TypeDetail):
+            return cached
+
+        response = await self._get_by_url(url)
+        schema = TypeSchema.model_validate(response.json())
+        type_detail = schema.to_domain()
+        self._hydration_cache[url] = type_detail
+        return type_detail
+    
     # ------------------------------------------------------------------
     # Public methods — only one for now, more in step 5.3
     # ------------------------------------------------------------------
@@ -203,3 +269,61 @@ class AsyncPokeAPIClient:
         eventually return a typed :class:`~poke_wrap.models.Pokemon`.
         """
         return await self._get(Endpoint.POKEMON, name_or_id)
+
+    async def get_pokemon_detailed(
+        self,
+        name_or_id: str | int,
+        *,
+        hydrate_abilities: bool = True,
+        hydrate_types: bool = True,
+        max_concurrency: int = 10,
+    ) -> PokemonDetailed:
+        """Fetch a Pokémon and hydrate selected references.
+
+        Unlike :meth:`get_pokemon`, this method follows the reference
+        URLs for abilities and (optionally) types to fetch their full
+        payloads. Each reference triggers one extra HTTP request, but
+        the results are cached in memory for the lifetime of the client
+        and on disk via ``hishel``.
+
+        Args:
+            name_or_id: Pokémon name or numeric ID.
+            hydrate_abilities: Fetch full ability payloads.
+            hydrate_types: Fetch full type payloads.
+            max_concurrency: Cap on simultaneous hydration requests.
+
+        Returns:
+            A :class:`~poke_wrap.models.PokemonDetailed` whose hydrated
+            lists are index-aligned with the corresponding slots in
+            ``pokemon``.
+        """
+        data = await self._get(Endpoint.POKEMON, name_or_id)
+        schema = PokemonSchema.model_validate(data)
+        base = schema.to_domain()
+
+        sem = asyncio.Semaphore(max_concurrency)
+
+        async def guarded(coro: Any) -> Any:
+            async with sem:
+                return await coro
+
+        abilities: list[Ability] | None = None
+        types: list[TypeDetail] | None = None
+
+        if hydrate_abilities and schema.abilities:
+            abilities = list(
+                await asyncio.gather(*[
+                    guarded(self._fetch_ability(slot.ability.url))
+                    for slot in schema.abilities
+                ])
+            )
+
+        if hydrate_types and schema.types:
+            types = list(
+                await asyncio.gather(*[
+                    guarded(self._fetch_type(slot.type.url))
+                    for slot in schema.types
+                ])
+            )
+
+        return PokemonDetailed(pokemon=base, abilities=abilities, types=types)

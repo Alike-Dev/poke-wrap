@@ -8,7 +8,7 @@ from poke_wrap._schemas.common import NamedAPIResourceSchema
 from poke_wrap._schemas.pokemon import PokemonSchema
 from poke_wrap.exceptions import PokeAPIError
 from poke_wrap.models.common import Reference
-from poke_wrap.models.pokemon import PokemonType
+from poke_wrap.models.type import PokemonType
 
 
 def _payload() -> dict[str, Any]:

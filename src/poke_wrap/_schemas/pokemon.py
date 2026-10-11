@@ -8,7 +8,8 @@ from pydantic import Field
 
 from poke_wrap._schemas.common import BaseSchema, NamedAPIResourceSchema
 from poke_wrap.exceptions import PokeAPIError
-from poke_wrap.models.pokemon import AbilitySlot, Pokemon, PokemonType, Stats
+from poke_wrap.models.pokemon import AbilitySlot, Pokemon, Stats
+from poke_wrap.models.type import PokemonType
 
 __all__ = [
     "AbilitySlotSchema",

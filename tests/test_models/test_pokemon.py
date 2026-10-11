@@ -4,7 +4,8 @@ import pytest
 from pydantic import ValidationError
 
 from poke_wrap.models.common import Reference
-from poke_wrap.models.pokemon import AbilitySlot, Pokemon, PokemonType, Stats
+from poke_wrap.models.pokemon import AbilitySlot, Pokemon, Stats
+from poke_wrap.models.type import PokemonType
 
 
 def _stats() -> Stats:

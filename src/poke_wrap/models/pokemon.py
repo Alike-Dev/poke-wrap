@@ -1,39 +1,13 @@
 """Domain models for the ``pokemon`` resource."""
 
 
-from enum import StrEnum
-
 from pydantic import BaseModel, ConfigDict
 
+from poke_wrap.models.ability import Ability
 from poke_wrap.models.common import Reference
+from poke_wrap.models.type import PokemonType, TypeDetail
 
-__all__ = ["AbilitySlot", "Pokemon", "PokemonType", "Stats"]
-
-
-class PokemonType(StrEnum):
-    """The 18 elemental types in Pokémon.
-
-    Values match PokeAPI's type names, so ``PokemonType.FIRE == "fire"``.
-    """
-
-    NORMAL = "normal"
-    FIRE = "fire"
-    WATER = "water"
-    ELECTRIC = "electric"
-    GRASS = "grass"
-    ICE = "ice"
-    FIGHTING = "fighting"
-    POISON = "poison"
-    GROUND = "ground"
-    FLYING = "flying"
-    PSYCHIC = "psychic"
-    BUG = "bug"
-    ROCK = "rock"
-    GHOST = "ghost"
-    DRAGON = "dragon"
-    DARK = "dark"
-    STEEL = "steel"
-    FAIRY = "fairy"
+__all__ = ["AbilitySlot", "Pokemon", "Stats"]
 
 
 class Stats(BaseModel):
@@ -115,3 +89,21 @@ class Pokemon(BaseModel):
     def is_dual_type(self) -> bool:
         """Whether the Pokémon has two types instead of one."""
         return len(self.types) == 2
+
+class PokemonDetailed(BaseModel):
+    """The result of :meth:`AsyncPokeAPIClient.get_pokemon_detailed`.
+
+    Wraps the lightweight :class:`Pokemon` together with fully-hydrated
+    versions of the references requested. Fields that were not hydrated
+    are ``None``.
+
+    The hydrated lists are **index-aligned** with the corresponding
+    slots in ``pokemon``: ``detailed.abilities[i]`` corresponds to
+    ``detailed.pokemon.abilities[i]``.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    pokemon: Pokemon
+    abilities: list[Ability] | None = None
+    types: list[TypeDetail] | None = None
