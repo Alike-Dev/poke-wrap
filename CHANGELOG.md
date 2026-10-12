@@ -20,4 +20,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In-memory hydration cache and SQLite response cache.
 - Full public API reexport from the package root.
 
-[Unreleased]: https://github.com/Alike-Dev/poke-wrap/commits/main
+[Unreleased]: https://github.com/Alike-Dev/poke-wrap/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Alike-Dev/poke-wrap/releases/tag/v0.1.0
