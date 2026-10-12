@@ -45,7 +45,7 @@ from poke_wrap.models import (
 )
 
 try:
-    __version__ = version("poke-wrap")
+    __version__ = version("poke-wrap-client")
 except PackageNotFoundError:  # pragma: no cover
     # Package is not installed (e.g. running from a raw checkout without
     # `uv sync`). Fall back to a dev marker so imports still work.

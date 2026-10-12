@@ -4,8 +4,8 @@
 
 > Wrapper asíncrono, tipado y con caché para [PokeAPI](https://pokeapi.co).
 
-[![Versión PyPI](https://img.shields.io/pypi/v/poke-wrap.svg)](https://pypi.org/project/poke-wrap/)
-[![Versiones de Python](https://img.shields.io/pypi/pyversions/poke-wrap.svg)](https://pypi.org/project/poke-wrap/)
+[![Versión PyPI](https://img.shields.io/pypi/v/poke-wrap.svg)](https://pypi.org/project/poke-wrap-client/)
+[![Versiones de Python](https://img.shields.io/pypi/pyversions/poke-wrap.svg)](https://pypi.org/project/poke-wrap-client/)
 [![Licencia: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tipado](https://img.shields.io/badge/typing-typed-blue.svg)](https://peps.python.org/pep-0561/)
 
@@ -26,13 +26,13 @@ cuando se lo pides — nunca por sorpresa.
 ## Instalación
 
 ```bash
-pip install poke-wrap
+pip install poke-wrap-client
 ```
 
 O con `uv`:
 
 ```bash
-uv add poke-wrap
+uv add poke-wrap-client
 ```
 
 ## Inicio rápido

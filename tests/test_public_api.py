@@ -27,7 +27,7 @@ def test_version_is_a_non_empty_string() -> None:
 
 
 def test_version_matches_installed_package() -> None:
-    assert poke_wrap.__version__ == version("poke-wrap")
+    assert poke_wrap.__version__ == version("poke-wrap-client")
 
 
 def test_client_is_reexported_from_canonical_module() -> None:

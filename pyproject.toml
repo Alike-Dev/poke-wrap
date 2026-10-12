@@ -1,5 +1,5 @@
 [project]
-name = "poke-wrap"
+name = "poke-wrap-client"
 version = "0.1.0"
 description = "Async, typed, cache-aware Python wrapper for PokeAPI."
 readme = "README.md"
