@@ -1,4 +1,5 @@
 """Tests for PokemonType."""
+
 from poke_wrap.models.type import PokemonType
 
 

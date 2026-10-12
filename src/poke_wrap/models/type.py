@@ -42,6 +42,7 @@ class PokemonType(StrEnum):
         """
         return repr(self.value)
 
+
 class TypeDamageRelations(BaseModel):
     """How a type interacts with other types in battle.
 
