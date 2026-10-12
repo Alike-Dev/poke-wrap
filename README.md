@@ -138,7 +138,8 @@ cd poke-wrap
 uv sync
 uv run pytest
 ```
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, tests and the helper
+scripts that wrap the pre-commit workflow (`pw-check`, `pw-commit`).
 
 ## License
 MIT — see [LICENSE](LICENSE).

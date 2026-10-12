@@ -162,7 +162,9 @@ uv sync
 uv run pytest
 ```
 
-Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para más detalles.
+Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para obtener información sobre la configuración,
+las pruebas y los scripts auxiliares que encapsulan el flujo de trabajo de 
+*pre-commit* (`pw-check`, `pw-commit`).
 
 ## Licencia
 
