@@ -38,12 +38,63 @@ build-backend = "hatchling.build"
 packages = ["src/poke_wrap"]
 
 [tool.commitizen]
-name = "cz_conventional_commits"
+name = "cz_customize"
 tag_format = "v$version"
 version_scheme = "pep440"
 version_provider = "pep621"
 update_changelog_on_bump = true
 major_version_zero = true
+
+[tool.commitizen.customize]
+message_template = "{{change_type}}{% if scope %}({{scope}}){% endif %}: {{message}}"
+example = "feat(client): add caching support"
+schema = "<type>(<scope>): <subject>"
+schema_pattern = "(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\(.*\\))?!?:.*"
+bump_pattern = "^(feat|fix|perf|refactor)"
+bump_map = {"feat" = "MINOR", "fix" = "PATCH", "perf" = "PATCH", "refactor" = "PATCH"}
+
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "change_type"
+message = "Select the type of change you are committing"
+choices = [
+    { value = "feat", name = "feat: A new feature" },
+    { value = "fix", name = "fix: A bug fix" },
+    { value = "docs", name = "docs: Documentation only changes" },
+    { value = "style", name = "style: Code style (formatting, whitespace)" },
+    { value = "refactor", name = "refactor: Code change that neither fixes a bug nor adds a feature" },
+    { value = "perf", name = "perf: Performance improvement" },
+    { value = "test", name = "test: Adding or fixing tests" },
+    { value = "build", name = "build: Build system or dependencies" },
+    { value = "ci", name = "ci: CI configuration" },
+    { value = "chore", name = "chore: Other changes (dependabot, config)" },
+    { value = "revert", name = "revert: Revert a previous commit" },
+]
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "scope"
+message = "What is the scope of this change? (press Enter to skip)"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "message"
+message = "Write a short, imperative description of the change"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "body"
+message = "Provide a longer description (optional, press Enter to skip)"
+
+[[tool.commitizen.customize.questions]]
+type = "confirm"
+name = "is_breaking_change"
+message = "Is this a BREAKING CHANGE?"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "footer"
+message = "List any issues closed by this change (optional, press Enter to skip)"
 
 [dependency-groups]
 dev = [
