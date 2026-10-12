@@ -32,6 +32,15 @@ class PokemonType(StrEnum):
     STEEL = "steel"
     FAIRY = "fairy"
 
+    def __repr__(self) -> str:
+        """Show the enum member as a plain quoted string in containers.
+
+        Without this override, ``repr()`` returns
+        ``<PokemonType.ELECTRIC: 'electric'>`` and lists look cluttered.
+        With it, ``[PokemonType.ELECTRIC]`` prints as ``['electric']``,
+        matching the behaviour users expect from a string-like enum.
+        """
+        return repr(self.value)
 
 class TypeDamageRelations(BaseModel):
     """How a type interacts with other types in battle.
